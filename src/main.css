@@ -1,0 +1,95 @@
+body {
+	background-color: #eee;
+	color: #111;
+	font-family: 'Fira Sans Condensed', sans-serif;
+	font-size: 90%;
+	height: 100vh;
+	margin: 0;
+	overflow: hidden;
+	padding: 0;
+}
+
+canvas {
+	border: 2px solid #09f;
+}
+
+header {
+    margin: 1em;
+}
+
+h1 {
+    margin-bottom: 0;
+}
+
+#strapline {
+    margin-top: 0;
+}
+
+#screen {
+	margin: 1em;
+	overflow: scroll;
+	height: 100%;
+}
+
+.location {
+    margin: 1em;
+}
+
+fieldset {
+	border: 0;
+	border-top: 2px solid #09f;
+	display: inline-block;
+	margin: 0 1em 0 0;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+fieldset > :last-child {
+	margin-right: 0;
+}
+
+label {
+	color: #666;
+	font-size: 0.9em;
+	margin-right: 0.5em;
+	white-space: nowrap;
+}
+
+select {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	border: none;
+	border-bottom: 2px solid #ccc;
+	font-family: 'Fira Sans Condensed', sans-serif;
+	font-size: 1em;
+	font-weight: 400;
+	margin: 0;
+	padding: 0 0.3em;
+}
+
+legend {
+	color: #000;
+	font-weight: bold;
+	padding-left: 0;
+	padding-right: 0.5em;
+}
+
+img {
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+#screen {
+    line-height: 1em;
+	min-height: 100%;
+	overflow: scroll;
+    white-space: pre-wrap;
+}
+
+#sourceUrl {
+    min-width: 50%;
+}

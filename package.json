@@ -1,0 +1,14 @@
+{
+  "name": "retro-render",
+  "description": "Canvas rendering of retro file formats.",
+  "author": {
+    "name": "Damien Guard",
+    "email": "damieng@gmail.com",
+    "url": "https://damieng.com"
+  },
+  "license": "MIT",
+  "version": "0.0.1",
+  "devDependencies": {
+    "typescript": "^2.9.2"
+  }
+}
