@@ -26,7 +26,6 @@
                     <option>1x</option>
                     <option>2x</option>
                     <option>3x</option>
-                    <option>4x</option>
                 </select>
             </label>
             <label>Border
@@ -46,7 +45,6 @@
 <script src="../dist/combined.js"></script>
 <script>
     const byId = (id) => document.getElementById(id);
-
     let render = () => { };
     SystemJS.import('index').then(r => 
         render = function() { 
@@ -56,7 +54,7 @@
             canvas.width = 256 * scale;
             canvas.height = 192 * scale;
             byId('output').appendChild(canvas);
-            r.render(source, canvas);
+            r.renderRect(source, canvas);
         }
     );
 </script>

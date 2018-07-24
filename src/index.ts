@@ -1,13 +1,12 @@
 import { Spectrum } from "./Platforms/Spectrum";
 
-const byId = (id: string) => document.getElementById(id);
-
-export async function render(url: string, canvas: HTMLCanvasElement): Promise<void> {
+export async function renderRect(url: string, canvas: HTMLCanvasElement): Promise<void> {
     const screenBinary = await getBinary(url);
-    const context = canvas.getContext('2d');
-    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-    Spectrum.DrawScreenToImageData(new Uint8Array(screenBinary), imageData);
-    context.putImageData(imageData, 0, 0);
+    Spectrum.DrawScreenToCanvas(new Uint8Array(screenBinary), canvas);
+}
+
+export async function renderPixel(url: string, canvas: HTMLCanvasElement): Promise<void> {
+    Spectrum.DrawScreenToCanvas(new Uint8Array(await getBinary(url)), canvas);
 }
 
 function createOption(value: string, label: string): HTMLOptionElement {

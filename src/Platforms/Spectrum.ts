@@ -4,10 +4,38 @@ export class Spectrum {
     constructor() {
     }
 
-    public static DrawScreenToImageData(screen: Uint8Array, imageData: ImageData): boolean {
-        if (imageData.width !== widthPixels || imageData.height !== heightPixels)
-            throw new Error(`Image must be ${widthPixels}x${heightPixels} in size`)
+    public static DrawScreenToCanvas(screen: Uint8Array, canvas: HTMLCanvasElement): void {
+        const pixelSize = canvas.width / 256;
+        if (pixelSize !== 1)
+            this.DrawScreenViaFillRect(screen, canvas);
+        else {
+            const context = canvas.getContext('2d');
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            this.DrawScreenViaImageData(screen, imageData);
+            context.putImageData(imageData, 0, 0);        
+        }
+    }
 
+    public static DrawScreenViaFillRect(screen: Uint8Array, canvas: HTMLCanvasElement): void {
+        const ctx = canvas.getContext('2d');        
+        const pixelSize = canvas.width / 256;
+        this.DrawScreen(screen, (x, y, color) => {
+            ctx.fillStyle = color.toStyle();
+            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        });
+    }
+    
+    public static DrawScreenViaImageData(screen: Uint8Array, imageData: ImageData): void {        
+        this.DrawScreen(screen, (x, y, color) => {
+            const offset = ((y * imageData.width) + x) * 4;
+            imageData.data[offset] = color.r;
+            imageData.data[offset + 1] = color.g;
+            imageData.data[offset + 2] = color.b;
+            imageData.data[offset + 3] = 255;
+        });
+    }
+
+    private static DrawScreen(screen: Uint8Array, setter: (x: number, y: number, c: Color) => void): void {
         for (let cellY = 0; cellY < heightCells; cellY++) {
             for (let cellX = 0; cellX < widthCells; cellX++) {
                 const attribute = screen[cellY * widthCells + attributeOffset + cellX];
@@ -20,17 +48,12 @@ export class Spectrum {
                     for (let pixelX = 0; pixelX < 8; pixelX++) {
                         const bit = 128 >> pixelX;
                         const x = (cellX * 8) + pixelX;
-                        const offset = ((y * imageData.width) + x) * 4;
-                        const color = (pixelData & bit) != 0 ? foreColor : backColor
-                        imageData.data[offset] = color.r;
-                        imageData.data[offset + 1] = color.g;
-                        imageData.data[offset + 2] = color.b;
-                        imageData.data[offset + 3] = 255;
+                        const color = (pixelData & bit) != 0 ? foreColor : backColor;
+                        setter(x, y, color);
                     }
                 }
             }
         }
-        return true;
     }
 
     public static GetPalette(index: number): Color {
