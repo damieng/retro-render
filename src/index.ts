@@ -9,14 +9,7 @@ export async function renderPixel(url: string, canvas: HTMLCanvasElement): Promi
     Spectrum.DrawScreenToCanvas(new Uint8Array(await getBinary(url)), canvas);
 }
 
-function createOption(value: string, label: string): HTMLOptionElement {
-    const option = <HTMLOptionElement>document.createElement('option');
-    option.value = value;
-    option.innerText = label;
-    return option;
-}
-
-function clearOptions(select: HTMLSelectElement): void {
-    while (select.options.length > 0)
-        select.options.remove(select.options.length - 1);
+export async function getAsTextLines(url: string): Promise<Array<string>> {
+    const text = await getPlainText(url);
+    return text.split('\n').map(t => t.trim());
 }

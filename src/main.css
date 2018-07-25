@@ -4,17 +4,8 @@ body {
 	font-family: 'Fira Sans Condensed', sans-serif;
 	font-size: 90%;
 	height: 100vh;
-	margin: 0;
-	overflow: hidden;
+	margin: 1em;
 	padding: 0;
-}
-
-canvas {
-	border: 2px solid #09f;
-}
-
-header {
-    margin: 1em;
 }
 
 h1 {
@@ -23,16 +14,6 @@ h1 {
 
 #strapline {
     margin-top: 0;
-}
-
-#screen {
-	margin: 1em;
-	overflow: scroll;
-	height: 100%;
-}
-
-.location {
-    margin: 1em;
 }
 
 fieldset {
@@ -83,13 +64,6 @@ img {
 	user-select: none;
 }
 
-#screen {
-    line-height: 1em;
-	min-height: 100%;
-	overflow: scroll;
-    white-space: pre-wrap;
-}
-
-#sourceUrl {
-    min-width: 50%;
+.screenshot {
+	border: 1px solid rgb(0,0,0,0);
 }

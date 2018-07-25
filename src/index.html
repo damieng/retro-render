@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Retro Render</title>
+    <title>Screen Renders</title>
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans+Condensed:400,700" rel="stylesheet">
     <link href="main.css" rel="stylesheet">
 </head>
@@ -11,13 +11,15 @@
 <body>
     <header>
         <h1>Retro Renders</h1>
-        <p id="strapline">Canvas rendering of retro file formats.</p>
+        <p id="strapline">Explore Sinclair Spectrum loading screens.</p>
         <fieldset>
-            <legend>Source</legend>
+            <legend>Filter</legend>
             <label>URL
-                <input type="text" id="sourceUrl" value="/test/Spectrum/files/ChainReaction.scr">
+                <input type="text" id="filter" placeholder="abc" />
             </label>
-            <button onclick="render()">Render</button>
+            <label>
+                <input type="checkbox" id="regex" />
+            </label>
         </fieldset>
         <fieldset>
             <legend>Options</legend>
@@ -28,14 +30,10 @@
                     <option>3x</option>
                 </select>
             </label>
-            <label>Border
-                <select>
-                    <option>None</option>
-                    <option>Thin</option>
-                    <option>Full</option>
-                </select>
-            </label>
         </fieldset>
+        <p>Matches
+            <span id="matchCount">0</span> showing first <span id="displayCount"></span>
+        </p>
     </header>
     <content id="output">
     </content>
@@ -44,19 +42,59 @@
 <script src="../lib/system.js"></script>
 <script src="../dist/combined.js"></script>
 <script>
-    const byId = (id) => document.getElementById(id);
-    let render = () => { };
-    SystemJS.import('index').then(r => 
-        render = function() { 
-            const scale = parseInt(byId('scale').value);
-            const source = byId('sourceUrl').value;
-            const canvas = document.createElement('canvas');
-            canvas.width = 256 * scale;
-            canvas.height = 192 * scale;
-            byId('output').appendChild(canvas);
-            r.renderRect(source, canvas);
+    var byId = (id) => document.getElementById(id);
+    var matchCount = byId('matchCount');
+    var output = byId('output');
+    var maxCount = 50;
+
+    SystemJS.import('index').then(r => {
+        var dir = '/sinclair/screens/loading/';
+        var filterInput = byId('filter');
+        var outputContent = byId('output');
+        var screenList = [];
+        var loadTimer;
+
+        filterInput.onkeyup = function () {
+            if (loadTimer)
+                window.clearTimeout(loadTimer);
+
+            loadTimer = window.setTimeout(loadImages, 500);
         }
-    );
+
+        function loadImages() {
+            var scale = parseInt(byId('scale').value);
+            var filterText = filterInput.value;
+            var results = [];
+
+            for (var item of screenList) {
+                if (item.indexOf(filterText) > -1)
+                    results.push(item);
+            }
+
+            outputContent.innerText = '';
+            matchCount.innerText = results.length;
+            displayCount.innerText = Math.min(results.length, maxCount);
+
+            var count = 0;
+            for (var item of results) {
+                add(item)
+                count++;
+                if (count > maxCount) break;
+            }
+
+            function add(name) {
+                var canvas = document.createElement('canvas');
+                canvas.classList.add('screenshot');
+                canvas.title = name;
+                canvas.width = 256 * scale;
+                canvas.height = 192 * scale;
+                r.renderRect(dir + name, canvas);
+                output.appendChild(canvas);
+            }
+        }
+
+        r.getAsTextLines(dir + '_list.txt').then(r => screenList = r);
+    });
 </script>
 
 </html>
