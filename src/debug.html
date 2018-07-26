@@ -15,7 +15,7 @@
         <fieldset>
             <legend>Source</legend>
             <label>URL
-                <input type="text" id="sourceUrl" value="/test/Spectrum/files/ChainReaction.scr">
+                <input type="text" id="sourceUrl" value="../samples/10BURG.NEO">
             </label>
             <button onclick="render()">Render</button>
         </fieldset>
@@ -51,10 +51,10 @@
             const scale = parseInt(byId('scale').value);
             const source = byId('sourceUrl').value;
             const canvas = document.createElement('canvas');
-            canvas.width = 256 * scale;
-            canvas.height = 192 * scale;
+            canvas.width = 320;
+            canvas.height = 200;
             byId('output').appendChild(canvas);
-            r.renderRect(source, canvas);
+            r.renderNeo(source, canvas);
         }
     );
 </script>

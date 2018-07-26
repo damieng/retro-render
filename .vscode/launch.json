@@ -5,7 +5,7 @@
             "name": "Launch Chrome with index.html",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:8080/src/index.html",
+            "url": "http://localhost:8080/src/debug.html",
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
         }

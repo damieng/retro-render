@@ -1,33 +1,33 @@
 import { Color } from "../Common/Color";
+import { ImageDefinition } from "../Common/ImageDefinition";
 
 export class Spectrum {
     constructor() {
     }
 
     public static GetFileExtensions(): string[] {
-        return [ ".scr" ];
+        return [".scr"];
     }
 
-    public static DrawScreenToCanvas(screen: Uint8Array, canvas: HTMLCanvasElement): void {
+    public static GetImageDefinition(buffer: ArrayBuffer): ImageDefinition {
+        switch (buffer.byteLength) {
+            case 6912: return new ImageDefinition(widthPixels, heightPixels, 16);
+            case 6144: return new ImageDefinition(widthPixels, heightPixels, 2);
+            default: return null;
+        }
+    }
+
+    public static DrawScreenToCanvas(screen: ArrayBuffer, canvas: HTMLCanvasElement): void {
         const context = canvas.getContext('2d');
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         this.DrawScreenViaImageData(screen, imageData);
-        context.putImageData(imageData, 0, 0);        
+        context.putImageData(imageData, 0, 0);
     }
 
-    public static DrawScreenViaFillRect(screen: Uint8Array, canvas: HTMLCanvasElement): void {
-        const ctx = canvas.getContext('2d');        
-        const pixelSize = canvas.width / 256;
-        this.DrawScreen(screen, (x, y, color) => {
-            ctx.fillStyle = color.toStyle();
-            ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-        });
-    }
-    
-    public static DrawScreenViaImageData(screen: Uint8Array, imageData: ImageData): void {     
-        if (screen.length !== 6144)
+    public static DrawScreenViaImageData(screen: ArrayBuffer, imageData: ImageData): void {
+        if (screen.byteLength !== 6144)
             throw new Error('Only 6144 byte color screen$ supported');
-        
+
         const pixelSize = imageData.width / 256;
         this.DrawScreen(screen, (x, y, color) => {
             const scanline = new Color(color.r / 3, color.g / 3, color.b / 3);
@@ -36,8 +36,8 @@ export class Spectrum {
                     color = scanline;
                 const yOff = ((y * pixelSize) + ry) * imageData.width;
                 for (var rx = 0; rx < pixelSize; rx++) {
-                    const offset = (yOff + (x * pixelSize) + rx) * 4;                        
-                    imageData.data[offset] = color.r;            
+                    const offset = (yOff + (x * pixelSize) + rx) * 4;
+                    imageData.data[offset] = color.r;
                     imageData.data[offset + 1] = color.g;
                     imageData.data[offset + 2] = color.b;
                     imageData.data[offset + 3] = 255;
@@ -46,7 +46,8 @@ export class Spectrum {
         });
     }
 
-    private static DrawScreen(screen: Uint8Array, setter: (x: number, y: number, c: Color) => void): void {
+    private static DrawScreen(buffer: ArrayBuffer, setter: (x: number, y: number, c: Color) => void): void {
+        const screen = new Uint8Array(buffer);
         for (let cellY = 0; cellY < heightCells; cellY++) {
             for (let cellX = 0; cellX < widthCells; cellX++) {
                 const attribute = screen[cellY * widthCells + attributeOffset + cellX];
@@ -108,6 +109,5 @@ const palette = [
     new Color(0, 0xff, 0),
     new Color(0, 0xff, 0xff),
     new Color(0xff, 0xff, 0),
-    new Color(0xff, 0xff, 0xff),
-
+    new Color(0xff, 0xff, 0xff)
 ];
