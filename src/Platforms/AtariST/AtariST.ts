@@ -14,7 +14,7 @@ export class AtariST {
             case Resolution.Medium: return AtariST.MediumResolution;
             case Resolution.High: return AtariST.HighResolution;
             default:
-                throw new Error(`Unknown resolution ${resolution} asked of AtariST.GetImageDefinition`);
+                throw new Error(`Unknown resolution ${resolution}`);
         }
     }
 
@@ -37,7 +37,7 @@ export class AtariST {
             case Resolution.Medium: return AtariST.RenderMediumResolution(buffer, imageData, palette);
             case Resolution.High: return AtariST.RenderHighResolution(buffer, imageData, palette);
             default:
-                throw new Error(`Unknown resolution ${resolution} asked of AtariST.GetImageDefinition`);
+                throw new Error(`Unknown resolution ${resolution}`);
         }
     }
 
@@ -46,7 +46,7 @@ export class AtariST {
         const data = imageData.data;
 
         let o = 0;
-        for (let i = 0; i < buffer.byteLength; i = i + 8) {
+        for (let i = 0; i < buffer.byteLength - 7; i = i + 8) {
             // ST Low-Res screen layout is 4 bitplanes interleaved 16 pixels (2 bytes) at a time
             const plane0 = dv.getUint16(i, false);
             const plane1 = dv.getUint16(i + 2, false);
@@ -63,7 +63,7 @@ export class AtariST {
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;
-                data[o++] = 255;
+                data[o++] = color.a;
             }
         }
     }
@@ -86,7 +86,7 @@ export class AtariST {
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;
-                data[o++] = 255;
+                data[o++] = color.a;
             }
         }
     }
@@ -96,7 +96,7 @@ export class AtariST {
         const data = imageData.data;
 
         let o = 0;
-        for (let i = 0; i < buffer.byteLength; i ++) {
+        for (let i = 0; i < dv.byteLength; i = i + 2) {
             // ST Hi-Res screen layout is 1 bitplane so no interleaving
             const plane0 = dv.getUint16(i, false);
             for (let pixel = 0; pixel < 16; pixel++) {
@@ -106,7 +106,7 @@ export class AtariST {
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;
-                data[o++] = 255;
+                data[o++] = color.a;
             }
         }
     }

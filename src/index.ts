@@ -1,12 +1,8 @@
-import { Spectrum } from "./Platforms/Spectrum";
-import { Neochrome } from "./Platforms/AtariST/NeoChrome";
+import { ImageFileFormat } from "./Common/FileFormat";
+import { GetRenderer } from "./Platforms/Format";
 
-export async function renderSpectrum(url: string, canvas: HTMLCanvasElement): Promise<void> {
-    Spectrum.DrawScreenToCanvas(await getBinary(url), canvas);
-}
-
-export async function renderNeo(url: string, canvas: HTMLCanvasElement): Promise<void> {
-    Neochrome.DrawScreenToCanvas(await getBinary(url), canvas);
+export function getRenderer(buffer: ArrayBuffer): ImageFileFormat {
+    return GetRenderer(buffer);
 }
 
 export async function getAsTextLines(url: string): Promise<Array<string>> {

@@ -12,27 +12,25 @@
     <header>
         <div id="logo">
             <h1>Retro Renders</h1>
-            <p id="strapline">Explore Sinclair Spectrum loading screens.</p>
+            <p id="strapline">Canvas rendering of retro file formats.</p>
         </div>
         <fieldset>
-            <legend>Filter</legend>
+            <legend>Direct</legend>
+            <label>URL
+                <input type="text" id="url" value="/samples/dizzy.scr" />
+            </label>
+            <button id="renderDirect">Render</button>
+        </fieldset>
+        <fieldset>
+            <legend>Filtered</legend>
             <label>Text
                 <input type="search" id="filter" placeholder="dizzy" />
             </label>
         </fieldset>
         <fieldset>
-            <legend>Options</legend>
-            <label>Scale
-                <select id="scale">
-                    <option>1x</option>
-                    <option>2x</option>
-                    <option>3x</option>
-                </select>
-            </label>
-        </fieldset>
-        <fieldset>
             <legend>Results</legend>
-            <span id="matchCount">0</span> fuzzy matches, showing top <span id="displayCount"></span>.
+            <span id="matchCount">0</span> fuzzy matches, showing top
+            <span id="displayCount"></span>.
         </fieldset>
     </header>
     <content id="output">
@@ -45,21 +43,19 @@
     var byId = (id) => document.getElementById(id);
     var matchCount = byId('matchCount');
     var output = byId('output');
+    var render
     var maxCount = 100;
     var threshold = 0.3;
-
-    String.prototype.score = function (e, f) { if (this === e) return 1; if ("" === e) return 0; var d = 0, a, g = this.toLowerCase(), n = this.length, h = e.toLowerCase(), k = e.length, b; a = 0; var l = 1, m, c; f && (m = 1 - f); if (f) for (c = 0; c < k; c += 1)b = g.indexOf(h[c], a), -1 === b ? l += m : (a === b ? a = .7 : (a = .1, " " === this[b - 1] && (a += .8)), this[b] === e[c] && (a += .1), d += a, a = b + 1); else for (c = 0; c < k; c += 1) { b = g.indexOf(h[c], a); if (-1 === b) return 0; a === b ? a = .7 : (a = .1, " " === this[b - 1] && (a += .8)); this[b] === e[c] && (a += .1); d += a; a = b + 1 } d = .5 * (d / n + d / k) / l; h[0] === g[0] && .85 > d && (d += .15); return d };
 
     SystemJS.import('index').then(r => {
         var dir = '/sinclair/screens/loading/';
         var filterInput = byId('filter');
-        var scaleOption = byId('scale');
         var outputContent = byId('output');
         var screenList = [];
         var loadTimer;
 
         filterInput.onkeyup = () => triggerLoad();
-        scaleOption.onselect = () => triggerLoad();
+        byId('renderDirect').onclick = () => add(byId('url').value);
 
         function triggerLoad() {
             if (loadTimer) {
@@ -69,8 +65,7 @@
             loadTimer = window.setTimeout(() => loadImages(), 700);
         }
 
-        function loadImages() {
-            var scale = parseInt(scaleOption.value);
+        async function loadImages() {
             var filterText = filterInput.value;
             var results = [];
 
@@ -87,27 +82,37 @@
             var count = 0;
             results.sort((a, b) => b.score - a.score);
             for (var item of results) {
-                add(item);
+                var canvas = await add(dir + item.filename);
+                canvas.title = item.title + ' score ' + item.score.toFixed(2);
                 count++;
                 if (count > maxCount) break;
             }
+        }
 
-            function add(item) {
-                var canvas = document.createElement('canvas');
-                canvas.classList.add('screenshot');
-                canvas.id = item.filename;
-                canvas.title = item.title + ' score ' + item.score.toFixed(2);
-                canvas.width = 256 * scale;
-                canvas.height = 192 * scale;
-                r.renderRect(dir + item.filename, canvas);
-                output.appendChild(canvas);
-            }
+        async function add(url) {
+            var canvas = document.createElement('canvas');
+            canvas.classList.add('screenshot');
+            canvas.width = 320;
+            canvas.height = 200;
+            await render(url, canvas);
+            output.appendChild(canvas);
+            return canvas;
+        }
+
+        async function render(url, canvas) {
+            const binary = await getBinary(url);
+            const renderer = r.getRenderer(binary);
+            const context = canvas.getContext('2d');
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            console.log('rendering');
+            renderer.RenderToImageData(binary, imageData);
+            context.putImageData(imageData, 0, 0);
         }
 
         r.getAsTextLines(dir + '_list.txt')
             .then(text => screenList = text.map(l => ({
                 filename: l,
-                title: l.slice(0, -4).replace(/([A-Z])/g, " $1").trim()
+                title: l.slice(0, -4).replace(/([^A-Z0-9][A-Z])/g, ' $1').trim()
             }))
             );
     });
