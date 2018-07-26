@@ -4,16 +4,15 @@ export class Spectrum {
     constructor() {
     }
 
+    public static GetFileExtensions(): string[] {
+        return [ ".scr" ];
+    }
+
     public static DrawScreenToCanvas(screen: Uint8Array, canvas: HTMLCanvasElement): void {
-        const pixelSize = canvas.width / 256;
-        if (pixelSize !== 1)
-            this.DrawScreenViaFillRect(screen, canvas);
-        else {
-            const context = canvas.getContext('2d');
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            this.DrawScreenViaImageData(screen, imageData);
-            context.putImageData(imageData, 0, 0);        
-        }
+        const context = canvas.getContext('2d');
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        this.DrawScreenViaImageData(screen, imageData);
+        context.putImageData(imageData, 0, 0);        
     }
 
     public static DrawScreenViaFillRect(screen: Uint8Array, canvas: HTMLCanvasElement): void {
@@ -25,13 +24,25 @@ export class Spectrum {
         });
     }
     
-    public static DrawScreenViaImageData(screen: Uint8Array, imageData: ImageData): void {        
+    public static DrawScreenViaImageData(screen: Uint8Array, imageData: ImageData): void {     
+        if (screen.length !== 6144)
+            throw new Error('Only 6144 byte color screen$ supported');
+        
+        const pixelSize = imageData.width / 256;
         this.DrawScreen(screen, (x, y, color) => {
-            const offset = ((y * imageData.width) + x) * 4;
-            imageData.data[offset] = color.r;
-            imageData.data[offset + 1] = color.g;
-            imageData.data[offset + 2] = color.b;
-            imageData.data[offset + 3] = 255;
+            const scanline = new Color(color.r / 3, color.g / 3, color.b / 3);
+            for (var ry = 0; ry < pixelSize; ry++) {
+                if (pixelSize === 2 && ry % 2 == 1)
+                    color = scanline;
+                const yOff = ((y * pixelSize) + ry) * imageData.width;
+                for (var rx = 0; rx < pixelSize; rx++) {
+                    const offset = (yOff + (x * pixelSize) + rx) * 4;                        
+                    imageData.data[offset] = color.r;            
+                    imageData.data[offset + 1] = color.g;
+                    imageData.data[offset + 2] = color.b;
+                    imageData.data[offset + 3] = 255;
+                }
+            }
         });
     }
 
