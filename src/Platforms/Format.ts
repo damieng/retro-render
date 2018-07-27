@@ -14,6 +14,8 @@ const allRenderers = new Map<Format, ImageFileFormat>([
 
 export function GetRenderer(buffer: ArrayBuffer): ImageFileFormat {
     if (buffer.byteLength === 6912 || buffer.byteLength === 6144)
-        allRenderers.get(Format.SpectrumScreen);
-    return allRenderers.get(Format.NEOchrome);
+        return allRenderers.get(Format.SpectrumScreen);
+    if (buffer.byteLength === 32128)
+       return allRenderers.get(Format.NEOchrome);
+    throw new Error(`Not sure what to do with ${buffer.byteLength} long file`);
 }

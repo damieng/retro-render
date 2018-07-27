@@ -53,8 +53,6 @@ export class SpectrumScreen implements ImageFileFormat {
         for (let cellY = 0; cellY < heightCells; cellY++) {
             for (let cellX = 0; cellX < widthCells; cellX++) {
                 const attribute = screen[cellY * widthCells + attributeOffset + cellX];
-                if (attribute > 64)
-                    console.log('bright', attribute);
                 const colors = Spectrum.GetAttributeColors(attribute);
                 for (let pixelY = 0; pixelY < 8; pixelY++) {
                     const y = (cellY * 8) + pixelY;

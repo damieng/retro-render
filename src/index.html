@@ -19,7 +19,11 @@
             <label>URL
                 <input type="text" id="url" value="/samples/dizzy.scr" />
             </label>
-            <button id="renderDirect">Render</button>
+            <button id="renderUrl">Render</button>
+        </fieldset>
+        <fieldset>
+            <legend>Debug</legend>
+            <button id="renderSamples">Render Samples</button>
         </fieldset>
         <fieldset>
             <legend>Filtered</legend>
@@ -43,9 +47,20 @@
     var byId = (id) => document.getElementById(id);
     var matchCount = byId('matchCount');
     var output = byId('output');
-    var render
     var maxCount = 100;
     var threshold = 0.3;
+    var samples = [
+        '10burg.neo',
+        '16crown.neo',
+        '3cast.neo',
+        '5auswahl.neo',
+        '7castle.neo',
+        'ChainReaction.scr',
+        'dizzy.scr',
+        'elmrsesn.neo',
+        'magicmtn.neo',
+        'medusabl.neo'
+    ];
 
     SystemJS.import('index').then(r => {
         var dir = '/sinclair/screens/loading/';
@@ -55,17 +70,23 @@
         var loadTimer;
 
         filterInput.onkeyup = () => triggerLoad();
-        byId('renderDirect').onclick = () => add(byId('url').value);
+        byId('renderUrl').onclick = () => add(byId('url').value);
+        byId('renderSamples').onclick = () => renderSamples();
 
-        function triggerLoad() {
+        async function renderSamples() {
+            for(var sample of samples)
+                await add('/samples/' + sample);
+        }
+
+        function triggerRenderFiltered() {
             if (loadTimer) {
                 window.clearTimeout(loadTimer);
                 loadTimer = null;
             }
-            loadTimer = window.setTimeout(() => loadImages(), 700);
+            loadTimer = window.setTimeout(() => renderFiltered(), 700);
         }
 
-        async function loadImages() {
+        async function renderFiltered() {
             var filterText = filterInput.value;
             var results = [];
 
@@ -92,8 +113,6 @@
         async function add(url) {
             var canvas = document.createElement('canvas');
             canvas.classList.add('screenshot');
-            canvas.width = 320;
-            canvas.height = 200;
             await render(url, canvas);
             output.appendChild(canvas);
             return canvas;
@@ -102,9 +121,13 @@
         async function render(url, canvas) {
             const binary = await getBinary(url);
             const renderer = r.getRenderer(binary);
+
+            const imgDef = renderer.GetImageDefinition(binary);
+            canvas.width = imgDef.width;
+            canvas.height = imgDef.height;
+
             const context = canvas.getContext('2d');
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            console.log('rendering');
             renderer.RenderToImageData(binary, imageData);
             context.putImageData(imageData, 0, 0);
         }
