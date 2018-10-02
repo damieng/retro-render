@@ -96,9 +96,9 @@ export class Spectrum512 implements ImageFileFormat {
         const x1 = Spectrum512.paletteSlide[c];
         if (x > x1 + 160)
             return c + 32;
-        // if (x > x1)
+        if (x > x1)
              return c + 16;
-        // return c;
+        return c;
     }
 
     public static GetPalette(buffer: ArrayBuffer): Color[] {
