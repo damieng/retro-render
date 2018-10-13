@@ -32,16 +32,17 @@ export class AtariST {
     }
 
     public static RenderScreen(resolution: Resolution, buffer: ArrayBuffer, imageData: ImageData, palette: Color[]): void {
+        var getColor = (index: number) => palette[index];
         switch (resolution) {
-            case Resolution.Low: return AtariST.RenderLowResolution(buffer, imageData, palette);
-            case Resolution.Medium: return AtariST.RenderMediumResolution(buffer, imageData, palette);
-            case Resolution.High: return AtariST.RenderHighResolution(buffer, imageData, palette);
+            case Resolution.Low: return AtariST.RenderLowResolution(buffer, imageData, getColor);
+            case Resolution.Medium: return AtariST.RenderMediumResolution(buffer, imageData, getColor);
+            case Resolution.High: return AtariST.RenderHighResolution(buffer, imageData, getColor);
             default:
                 throw new Error(`Unknown resolution ${resolution}`);
         }
     }
 
-    public static RenderLowResolution(buffer: ArrayBuffer, imageData: ImageData, palette: Color[]): void {
+    public static RenderLowResolution(buffer: ArrayBuffer, imageData: ImageData, getColor: (index: number) => Color): void {
         const dv = new DataView(buffer);
         const data = imageData.data;
 
@@ -54,12 +55,11 @@ export class AtariST {
             const plane3 = dv.getUint16(i + 6, false);
             for (let pixel = 0; pixel < 16; pixel++) {
                 const mask = 1 << (15 - pixel);
-                const palIdx = 
+                const color = getColor(
                     ((plane0 & mask) === mask ? 1 : 0) |
                     ((plane1 & mask) === mask ? 2 : 0) |
                     ((plane2 & mask) === mask ? 4 : 0) |
-                    ((plane3 & mask) === mask ? 8 : 0);
-                const color = palette[palIdx];
+                    ((plane3 & mask) === mask ? 8 : 0));
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;
@@ -68,7 +68,7 @@ export class AtariST {
         }
     }
 
-    public static RenderMediumResolution(buffer: ArrayBuffer, imageData: ImageData, palette: Color[]): void {
+    public static RenderMediumResolution(buffer: ArrayBuffer, imageData: ImageData, getColor: (index: number) => Color): void {
         const dv = new DataView(buffer);
         const data = imageData.data;
 
@@ -79,10 +79,9 @@ export class AtariST {
             const plane1 = dv.getUint16(i + 2, false);
             for (let pixel = 0; pixel < 16; pixel++) {
                 const mask = 1 << (15 - pixel);
-                const palIdx = 
+                const color = getColor(
                     ((plane0 & mask) === mask ? 1 : 0) |
-                    ((plane1 & mask) === mask ? 2 : 0);
-                const color = palette[palIdx];
+                    ((plane1 & mask) === mask ? 2 : 0));
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;
@@ -91,7 +90,7 @@ export class AtariST {
         }
     }
 
-    public static RenderHighResolution(buffer: ArrayBuffer, imageData: ImageData, palette: Color[]): void {
+    public static RenderHighResolution(buffer: ArrayBuffer, imageData: ImageData, getColor: (index: number) => Color): void {
         const dv = new DataView(buffer);
         const data = imageData.data;
 
@@ -101,8 +100,7 @@ export class AtariST {
             const plane0 = dv.getUint16(i, false);
             for (let pixel = 0; pixel < 16; pixel++) {
                 const mask = 1 << (15 - pixel);
-                const palIdx = (plane0 & mask) === mask ? 1 : 0;
-                const color = palette[palIdx];
+                const color = getColor((plane0 & mask) === mask ? 1 : 0);
                 data[o++] = color.r;
                 data[o++] = color.g;
                 data[o++] = color.b;

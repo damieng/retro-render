@@ -54,45 +54,27 @@ export class Spectrum512 implements ImageFileFormat {
         if (dv.byteLength !== 51104)
             throw new Error(`Incorrect length of ${dv.byteLength} but expected 51104`);
 
-        const data = imageData.data;
         const palette = Spectrum512.GetPalette(buffer.slice(Offset.Palette));
 
-        let o = 0;
         let x = 0;
         let y = 0;
         let absIndex = 0;
-        for (let i = 0; i < Offset.Palette - 7; i = i + 8) {
-            // ST Low-Res screen layout is 4 bitplanes interleaved 16 pixels (2 bytes) at a time
-            const plane0 = dv.getUint16(i, false);
-            const plane1 = dv.getUint16(i + 2, false);
-            const plane2 = dv.getUint16(i + 4, false);
-            const plane3 = dv.getUint16(i + 6, false);
-            for (let pixel = 0; pixel < 16; pixel++) {
-                x++;
-                const mask = 1 << (15 - pixel);
-                const palIdx = 
-                    ((plane0 & mask) === mask ? 1 : 0) |
-                    ((plane1 & mask) === mask ? 2 : 0) |
-                    ((plane2 & mask) === mask ? 4 : 0) |
-                    ((plane3 & mask) === mask ? 8 : 0);
-                const lineIndex = Spectrum512.GetPaletteScanlineEntry(x, palIdx)
-                const color = palette[absIndex + lineIndex];
-                data[o++] = color.r;
-                data[o++] = color.g;
-                data[o++] = color.b;
-                data[o++] = color.a;
-            }
+        const getColor = (index: number) => {
+            const lineIndex = Spectrum512.GetPaletteScanlineEntry(x++, index);
             if (x === 320) {
                 x = 0;
                 absIndex = y++ * ColorsPerScanline;
             }
+            return palette[absIndex + lineIndex];
         }
+
+        AtariST.RenderLowResolution(buffer, imageData, getColor);
     }
 
     private static paletteSlide = [ 1, 5, 21, 25, 41, 45, 61, 65, 81, 85, 101, 105, 121, 125, 141, 145 ];
 
     public static GetPaletteScanlineEntry(x: number, c: number): number {
-        // Some kind of sliding palette window that confuses me
+        // Some kind of sliding window for the palette
         const x1 = Spectrum512.paletteSlide[c];
         if (x > x1 + 160)
             return c + 32;
