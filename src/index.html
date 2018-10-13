@@ -121,16 +121,20 @@
 
         async function render(url, canvas) {
             const binary = await getBinary(url);
-            const renderer = r.getRenderer(binary);
+            try {
+                const renderer = r.getRenderer(binary);
 
-            const imgDef = renderer.GetImageDefinition(binary);
-            canvas.width = imgDef.width;
-            canvas.height = imgDef.height;
+                const imgDef = renderer.GetImageDefinition(binary);
+                canvas.width = imgDef.width;
+                canvas.height = imgDef.height;
 
-            const context = canvas.getContext('2d');
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            renderer.RenderToImageData(binary, imageData);
-            context.putImageData(imageData, 0, 0);
+                const context = canvas.getContext('2d');
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                renderer.RenderToImageData(binary, imageData);
+                context.putImageData(imageData, 0, 0);
+            } catch(exception) {
+                throw new Error(`Unable to render ${url}`);
+            }
         }
 
         r.getAsTextLines(dir + '_list.txt')
