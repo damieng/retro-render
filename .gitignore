@@ -2,3 +2,5 @@ node_modules/
 dist/
 yarn.lock
 samples/
+.vs/slnx.sqlite
+.vs/retro-render/v15/.suo
