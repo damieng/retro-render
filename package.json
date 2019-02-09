@@ -9,6 +9,6 @@
   "license": "MIT",
   "version": "0.0.1",
   "devDependencies": {
-    "typescript": "^2.9.2"
+    "typescript": "^3.3.3"
   }
 }
