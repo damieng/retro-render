@@ -2,12 +2,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome with index.html",
-            "type": "chrome",
+            "name": "Launch Firefox with index.html",
+            "type": "firefox",
             "request": "launch",
-            "url": "http://localhost:8080/src/index.html",
-            "webRoot": "${workspaceFolder}",
-            "sourceMaps": true,
+            "file": "${workspaceFolder}/src/index.html",
+            "reAttach": true
         }
     ]
 }
