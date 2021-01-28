@@ -64,13 +64,13 @@
     ];
 
     SystemJS.import('index').then(r => {
-        var dir = '/sinclair/screens/loading/';
+        var dir = 'http://bitsparse.com/sinclair/screens/loading/';
         var filterInput = byId('filter');
         var outputContent = byId('output');
         var screenList = [];
         var loadTimer;
 
-        filterInput.onkeyup = () => triggerLoad();
+        filterInput.onkeyup = () => triggerRenderFiltered();
         byId('renderUrl').onclick = () => add(byId('url').value);
         byId('renderSamples').onclick = () => renderSamples();
 
