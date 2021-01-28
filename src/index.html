@@ -69,13 +69,15 @@
         var outputContent = byId('output');
         var screenList = [];
         var loadTimer;
+        var requestId = 0;
 
         filterInput.onkeyup = () => triggerRenderFiltered();
         byId('renderUrl').onclick = () => add(byId('url').value);
         byId('renderSamples').onclick = () => renderSamples();
+        loadIndex();
 
         async function renderSamples() {
-            for(var sample of samples)
+            for (var sample of samples)
                 await add('/samples/' + sample);
         }
 
@@ -88,8 +90,12 @@
         }
 
         async function renderFiltered() {
+            requestId++;
             var filterText = filterInput.value;
             var results = [];
+            outputContent.innerText = '';
+
+            var thisRequestId = requestId;
 
             for (var item of screenList) {
                 item.score = item.title.score(filterText);
@@ -97,14 +103,16 @@
                     results.push(item);
             }
 
-            outputContent.innerText = '';
             matchCount.innerText = results.length;
             displayCount.innerText = Math.min(results.length, maxCount);
 
             var count = 0;
             results.sort((a, b) => b.score - a.score);
             for (var item of results) {
+                if (requestId !== thisRequestId) return;
                 var canvas = await add(dir + item.filename);
+                if (requestId !== thisRequestId) return;
+                output.appendChild(canvas);
                 canvas.title = item.title + ' score ' + item.score.toFixed(2);
                 count++;
                 if (count > maxCount) break;
@@ -115,7 +123,6 @@
             var canvas = document.createElement('canvas');
             canvas.classList.add('screenshot');
             await render(url, canvas);
-            output.appendChild(canvas);
             return canvas;
         }
 
@@ -132,17 +139,19 @@
                 const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                 renderer.RenderToImageData(binary, imageData);
                 context.putImageData(imageData, 0, 0);
-            } catch(exception) {
+            } catch (exception) {
                 throw new Error(`Unable to render ${url}`);
             }
         }
 
-        r.getAsTextLines(dir + '_list.txt')
-            .then(text => screenList = text.map(l => ({
-                filename: l,
-                title: l.slice(0, -4).replace(/([^A-Z0-9][A-Z])/g, ' $1').trim()
-            }))
-            );
+        function loadIndex() {
+            r.getAsTextLines(dir + '_list.txt')
+                .then(text => screenList = text.map(l => ({
+                    filename: l,
+                    title: l.slice(0, -4).replace(/([^A-Z0-9][A-Z])/g, ' $1').trim()
+                }))
+                );
+        }
     });
 </script>
 
